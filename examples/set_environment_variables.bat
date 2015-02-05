@@ -1,3 +1,3 @@
 @echo off
 
-call ..\bin\set_environment_variables.bat %*
+call %~p0\..\bin\set_environment_variables.bat %*

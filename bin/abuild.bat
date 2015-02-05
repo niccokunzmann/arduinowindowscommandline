@@ -92,7 +92,17 @@ if not exist !abuild_output! (
 !abuild_report! sketch input file: !abuild_SketchName!
 !abuild_report! sketch extension: !abuild_SketchName:~-4!
 
+set preprocess_sketch=false
+
+rem http://stackoverflow.com/questions/8438511/if-or-if-in-a-windows-batch-file
 if /i "!abuild_SketchName:~-4!" == ".pde" (
+  set preprocess_sketch=true
+)
+if /i "!abuild_SketchName:~-4!" == ".ino" (
+  set preprocess_sketch=true
+)
+
+if "!preprocess_sketch!" == "true" (
     REM     If we see .pde on the end, we will do a tiny amount of preprocessing,
     REM     but not as much as the Arduino IDE would do.
     FOR /f %%i IN ("%abuild_SketchName%") DO (
@@ -107,7 +117,7 @@ if /i "!abuild_SketchName:~-4!" == ".pde" (
         >>!abuild_cppname! type "!arduino_runtime!\main.cxx"
     )
 ) else (
-    !abuild_report! found non-PDE file; will not preprocess.
+    !abuild_report! file is neither .pde not .ino; will not preprocess.
     set abuild_cppname=!abuild_SketchName!
     set abuild_preprocess=false
 )
@@ -152,8 +162,8 @@ if !abuild_nolibs! == false (
 	)
 	popd
 )
-echo "abuild_include_paths"
-echo !abuild_include_paths!
+rem due to later Arduino software versions we may not find the libraries there
+rem echo !abuild_include_paths!
 
 REM ---------------------------------------------------------------------------
 REM     Compile the user's sketch first, to help her find errors quicker...

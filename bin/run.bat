@@ -1,5 +1,7 @@
 @echo off
 
+
+set rc=1
 rem ---------------------------------------------------------------------
 rem                     show the help
 
@@ -27,14 +29,18 @@ if "%~1" == "" (
   echo.
   echo   This example runs the simple_program.ino on the Arduino.
   echo   The file communicates with 9600 baud via Serial.
-  exit /b 1
+  goto end
 )
 
 rem ---------------------------------------------------------------------
 rem                     remove compiled files
 
-IF EXIST ".\obj" (
-    rmdir ".\obj" /s /q
+set run_current_directory=%CD%
+set run_output=%CD%\obj
+set run_SketchName=%~dpf1
+
+IF EXIST "%run_output%" (
+    rmdir "%run_output%" /s /q
 )
 
 if "%~2" == "" (
@@ -43,34 +49,28 @@ if "%~2" == "" (
   set SERIAL_BAUD_RATE=%2
 )
 
-if errorlevel 0 (
+rem ---------------------------------------------------------------------
+rem                     compile the file
 
-  rem ---------------------------------------------------------------------
-  rem                     compile the file
+cd %~dp0
 
-  call abuild.bat -r -c "positioning_system\examples\%1\%1.pde" 
+call abuild.bat -u -r -o "%run_output%" "%run_SketchName%"
 
-  if errorlevel 0 (
-    rem ---------------------------------------------------------------------
-    rem                     upload the file
-    
-    rem does not work:
-    rem FOR %%A IN (obj\*.hex) DO set elf_file_size=%%~zA
-    rem echo Binary Sketchsize: %elf_file_size% bytes (out of a maximum of %ARDUINO_MAXIMUM_UPLOAD_SIZE% bytes)
-
-    call aupload.bat obj/%1.hex
-    if errorlevel 0 (
-      if exist obj/%1.hex (
-      
-        rem ---------------------------------------------------------------------
-        rem                     show the output
-
-        rem http://serverfault.com/questions/432322/how-to-sleep-in-a-batch-file#432323
-        rem timeout /t 5 /nobreak
-
-        rem http://stackoverflow.com/questions/11775185/open-a-com-port-in-c-with-number-higher-that-9
-        ..\serialterm\serialterm.exe \\.\%ARDUINO_COMPORT% %SERIAL_BAUD_RATE%
-      )
-    )
-  )
+if not %errorlevel% == 0 (
+    goto end
 )
+
+rem ---------------------------------------------------------------------
+rem                     show the output
+
+rem http://serverfault.com/questions/432322/how-to-sleep-in-a-batch-file#432323
+rem timeout /t 5 /nobreak
+
+rem http://stackoverflow.com/questions/11775185/open-a-com-port-in-c-with-number-higher-that-9
+serialterm.exe \\.\%ARDUINO_COMPORT% %SERIAL_BAUD_RATE%
+
+
+set rc=0
+:end
+cd %run_current_directory%
+exit /b %rc%

@@ -42,7 +42,7 @@ if "%~4" == "" (
   @echo         Example: COM12
   @echo         The following COM ports were detected:
   set spcp=hello
-  for /F "delims=" %%i in ('EnumSer.exe') do (
+  for /F "delims=" %%i in ('%~p0\EnumSer.exe') do (
     rem http://stackoverflow.com/a/8607291/1320237
     if "%%i" == "EnumPorts method reports" (
       set spcp=
