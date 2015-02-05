@@ -33,7 +33,7 @@ if /i "%1" == "-o" (
         !abuild_error! expected output path after '-o'
         goto end
     )
-    set abuild_output=%2
+    set abuild_output=%~2
     shift
     shift
     goto NextOption
@@ -122,6 +122,8 @@ if "!preprocess_sketch!" == "true" (
     set abuild_preprocess=false
 )
 
+set abuild_cppdname=!abuild_cppname!.d
+
 !abuild_report! Compiler output will go to:  !abuild_output!
 
 REM ---------------------------------------------------------------------------
@@ -143,24 +145,32 @@ for %%f in (
 REM ---------------------------------------------------------------------------
 REM     Find all external libraries, and compile a list of include paths...
 
+set ARDUINO_USER_LIBRARY_DIRECTORY=!ARDUINO_USER_LIBRARIES!\libraries
+set ARDUINO_USER_LIBRARY_DIRECTORIES=!ARDUINO_USER_LIBRARY_DIRECTORY!\*
+
+
 if !abuild_nolibs! == false (
 	set abuild_include_paths=
 	set abuild_include_paths_root=!arduino_path!\libraries
 
-	REM HACK: for some reason, I am unable to get for work with both /R and /D, when it needs to expand
-	REM an environment variable for the /R root..? hardcoding the path works... using pushd/popd as a workaround
-	pushd !abuild_include_paths_root!
-	for /R /D %%d in ("*.*") do (
-		REM Don't include example directories
-		set test_dir=%%d
-		set test=!test_dir:*examples=examples!
-		set test=!test:~0,8!
-		
-		if NOT !test! EQU examples (
-			set abuild_include_paths=!abuild_include_paths! -I"%%~d"
-		)
-	)
-	popd
+  for %%p in ("!abuild_include_paths_root!" "!ARDUINO_USER_LIBRARY_DIRECTORY!") do (
+    REM HACK: for some reason, I am unable to get for work with both /R and /D, when it needs to expand
+    REM an environment variable for the /R root..? hardcoding the path works... using pushd/popd as a workaround
+    
+    pushd %%p
+    for /R /D %%d in ("*.*") do (
+      REM Don't include example directories
+      set test_dir=%%d
+      set test=!test_dir:*examples=examples!
+      set test=!test:~0,8!
+      
+      if NOT !test! EQU examples (
+        
+        set abuild_include_paths=!abuild_include_paths! -I"%%~d"
+      )
+    )
+    popd
+  )
 )
 rem due to later Arduino software versions we may not find the libraries there
 rem echo !abuild_include_paths!
@@ -179,6 +189,7 @@ for %%f in (!abuild_cppname!) do (
     !abuild_report! !abuild_cmd!
     if exist !abuild_user_objfile! (del !abuild_user_objfile!)
     !abuild_cmd!
+    echo !abuild_cmd! > x.out
     if not exist !abuild_user_objfile! (
         !abuild_error! cannot compile %%f using command:
         !abuild_error! !abuild_cmd!
@@ -265,62 +276,85 @@ REM Once again, do the pushd/pop hack for the recursive for loop...
 REM Also, all abuild_cmd are CALL'ed below, otherwise the shell passes arguments incorrectly
 REM to the avr toolchain on the second iteration through the inner loops..!
 
-set ARDUINO_USER_LIBRARY_DIRECTORIES=!ARDUINO_USER_LIBRARIES!\libraries\*
 
 if !abuild_nolibs! == false (
-	for /D %%d in ("!arduino_path!\hardware\libraries\*.*" "!ARDUINO_USER_LIBRARY_DIRECTORIES!") do (
-		!abuild_report! Building library: %%d
+  rem format dependecy file so we can check if the library is listed
+  set abuild_cppd2name=!abuild_cppdname!.formatted
+  if exist "!abuild_cppd2name!" (
+    rm !abuild_cppd2name!
+  )
+
+  for /F "delims=" %%i in (!abuild_cppdname!) do (
+    rem process the lines of the dependency file
+    rem each line ends with \
+    set dependency=%%i
+    rem how to replace substrings http://stackoverflow.com/questions/5273937/how-to-replace-substrings-in-windows-batch-file
+    set dependency=!dependency:\ = !
+    echo !dependency! >> "!abuild_cppd2name!"
+  )
+
+  rem build libraries
+	for /D %%d in ("!abuild_include_paths_root!\*.*" "!ARDUINO_USER_LIBRARY_DIRECTORIES!") do (
     
     set currently_building_library_directory=%%d
     
-		pushd %%d
-		for /R %%f in ("*.c") do (
-			rem Make sure we're not building an example
-			set test_file=%%f
-			set test=!test_file:*examples=examples!
-			set test=!test:~0,8!
-			
-			if NOT !test! EQU examples (
-				popd
-				set abuild_objfile=!abuild_output!\%%~nf.c.o
-				set abuild_cmd=avr-gcc "-I!currently_building_library_directory!" !abuild_gcc_opts!  "%%~f" -o "!abuild_objfile!"
-				!abuild_report! !abuild_cmd!
-				if exist !abuild_objfile! (del !abuild_objfile!)
-				call !abuild_cmd!
-				if not exist !abuild_objfile! (goto end)
-				if not !errorlevel! == 0 (goto end)
-			    
-				set abuild_cmd=avr-ar rcs !abuild_runtime_library! !abuild_objfile!
-				!abuild_report! !abuild_cmd!
-				call !abuild_cmd!
-				if not !errorlevel! == 0 (goto end)
-				pushd %%d
-			)
-		)
+    rem determine if the library is used
+    set dependency_string=%%~pnd
+    set build_library=false
+    find /I "!dependency_string!" "!abuild_cppd2name!" > Nul && set build_library=true
+    
+    if "!build_library!" == "true" (
+      rem building c and cpp files
+      !abuild_report! Building library: %%d
+      pushd %%d
+      for /R %%f in ("*.c") do (
+        rem Make sure we're not building an example
+        set test_file=%%f
+        set test=!test_file:*examples=examples!
+        set test=!test:~0,8!
+        
+        if NOT !test! EQU examples (
+          popd
+          set abuild_objfile=!abuild_output!\%%~nf.c.o
+          set abuild_cmd=avr-gcc "-I!currently_building_library_directory!" !abuild_gcc_opts!  "%%~f" -o "!abuild_objfile!"
+          !abuild_report! !abuild_cmd!
+          if exist !abuild_objfile! ( del !abuild_objfile! )
+          call !abuild_cmd!
+          if not exist !abuild_objfile! ( goto end )
+          if not !errorlevel! == 0 ( goto end )
+            
+          set abuild_cmd=avr-ar rcs !abuild_runtime_library! !abuild_objfile!
+          !abuild_report! !abuild_cmd!
+          call !abuild_cmd!
+          if not !errorlevel! == 0 ( goto end )
+          pushd %%d
+        )
+      )
 
-		for /R %%f in ("*.cpp") do (
-			rem Make sure we're not building an example
-			set test_file=%%f
-			set test=!test_file:*examples=examples!
-			set test=!test:~0,8!
-			
-			if NOT !test! EQU examples (
-				popd
-				set abuild_objfile=!abuild_output!\%%~nf.cpp.o
-				set abuild_cmd=avr-g++ "-I!currently_building_library_directory!" !abuild_gpp_opts! "%%~f" -o "!abuild_objfile!"
-				!abuild_report! !abuild_cmd!
-				if exist !abuild_objfile! (del !abuild_objfile!)
-				call !abuild_cmd!
-				if not exist !abuild_objfile! (goto end)
-				if not !errorlevel! == 0 (goto end)
-			    
-				set abuild_cmd=avr-ar rcs !abuild_runtime_library! !abuild_objfile!
-				!abuild_report! !abuild_cmd!
-				call !abuild_cmd!
-				if not !errorlevel! == 0 (goto end)
-				pushd %%d
-			)
-		)
+      for /R %%f in ("*.cpp") do (
+        rem Make sure we're not building an example
+        set test_file=%%f
+        set test=!test_file:*examples=examples!
+        set test=!test:~0,8!
+        
+        if NOT !test! EQU examples (
+          popd
+          set abuild_objfile=!abuild_output!\%%~nf.cpp.o
+          set abuild_cmd=avr-g++ "-I!currently_building_library_directory!" !abuild_gpp_opts! "%%~f" -o "!abuild_objfile!"
+          !abuild_report! !abuild_cmd!
+          if exist !abuild_objfile! (del !abuild_objfile!)
+          call !abuild_cmd!
+          if not exist !abuild_objfile! ( goto end )
+          if not !errorlevel! == 0 ( goto end )
+            
+          set abuild_cmd=avr-ar rcs !abuild_runtime_library! !abuild_objfile!
+          !abuild_report! !abuild_cmd!
+          call !abuild_cmd!
+          if not !errorlevel! == 0 ( goto end )
+          pushd %%d
+        )
+      )
+    )
 		popd
 	)
 )
