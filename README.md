@@ -1,6 +1,35 @@
 Arduino Windows Command Line
 ============================
 
+
+Try it
+------
+
+	> set_environment_variables.bat "C:\Program Files (x86)\Arduino" "C:\Users\UserName\Documents\Arduino" uno COM15
+
+configures the compiler and uploader.
+
+	> run.bat simple_program\simple_program.ino
+
+compiles, uploads and shows the output of `simple_program.ino` on the Arduino.  
+You will see
+
+	Counting down from 10:
+	10
+	9
+	8
+	7
+	6
+	5
+	4
+	3
+	2
+	1
+	0
+
+What is in it
+-------------
+
 The files were copied from 
 http://playground.arduino.cc/Code/WindowsCommandLine
 and a few adaptations were made.
