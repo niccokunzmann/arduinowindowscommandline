@@ -39,7 +39,8 @@ and a few adaptations were made.
  - `abuild.bat` is used to build the sketches.
 	 - now requires the Arduino 1.x software with `Arduino.h` 	
 	 - builds dependencies only
-
  - `aupload.bat` uploads a compiled `.hex` file to the Arduino 
  - `serialterm.exe` is used to view the output of the Arduino
  - `run.bat` compiles and uploads a arduino sketch and shows the output via `serialterm.exe`.
+
+It was used with [ARDUINO 1.0.6](http://arduino.cc/en/Main/Software).
