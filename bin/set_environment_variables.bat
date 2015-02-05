@@ -1,8 +1,10 @@
 @echo off
+rem http://stackoverflow.com/a/8607291/1320237
+setlocal enableDelayedExpansion
 rem ---------------------------------------------------------------------------
 rem                     set environment variables
 rem See http://playground.arduino.cc/Code/WindowsCommandLine
-rem you will need to edit this file
+
 
 if "%~4" == "" (
   @echo sets the variables necessairy for abuild.bat and aupload.bat
@@ -11,12 +13,19 @@ if "%~4" == "" (
   @echo.  
   @echo     ARDUINO_PATH 
   @echo         is the path where the Arduino software is installed.
-  @echo         Example: "C:\Program Files (x86)\Arduino"
+  if not defined ARDUINO_PATH (
+    if "%ProgramFiles(x86)%" NEQ "" (
+      @echo         Example: "%ProgramFiles(x86)%\Arduino"
+      @echo         Example: "%ProgramFiles%\Arduino"
+    ) else (
+      @echo         Example: "%ProgramFiles%\Arduino"
+    )
+  )
   @echo.
   @echo     ARDUINO_USER_LIBRARIES 
   @echo         is the path to the libraries folder which contains 
   @echo         user defined libraries
-  @echo         Example: C:\Users\USERNAME\Documents\Arduino
+  @echo         Example: "%USERPROFILE%\Documents\Arduino"
   @echo.
   @echo     ARDUINO_MODEL
   @echo         is the model of the Arduino. Have a look at boards.txt
@@ -25,9 +34,24 @@ if "%~4" == "" (
   @echo. 
   @echo    ARDUINO_COMPORT
   @echo        is the port which the Arduino is connected to.
-  @echo        Example: COM3
+  @echo        It is the port where the output of Serial.print will go to.
+  @echo        Example: COM12
+  @echo        The following COM ports were detected:
+  set spcp=hello
+  for /F "delims=" %%i in ('EnumSer.exe') do (
+    rem http://stackoverflow.com/a/8607291/1320237
+    if "%%i" == "EnumPorts method reports" (
+      set spcp=
+    )
+    if "!spcp!" == "true" (
+      @echo        Detected: %%i
+    )
+    if "%%i" == "Device Manager (SetupAPI - Ports Device information set) reports" (
+      set spcp=true
+    )
+  )
   @echo. 
-  exit /b 0
+  exit /b 1
 )
 
 rem where you installed Arduino on your computer (e.g. C:\ARDUINO-0011)
@@ -43,12 +67,8 @@ rem the port to which your programmer is connected (e.g. COM1, COM2, etc.)
 SET ARDUINO_COMPORT=%~4
 
 rem ---------------------------------------------------------------------
-rem processing the boards.txt file
-set boards_txt_file_path=%ARDUINO_PATH%\hardware\arduino\boards.txt
-
-echo %boards_txt_file_path%
-
-copy "%boards_txt_file_path%" boards.txt
+rem processing the boards.txt file found in boards_txt_directory_path
+set boards_txt_directory_path=%ARDUINO_PATH%\hardware\arduino\
 
 set ARDUINO_NAME_TOKEN=%ARDUINO_MODEL%.name
 set ARDUINO_MCU_TOKEN=%ARDUINO_MODEL%.build.mcu
@@ -60,7 +80,10 @@ set ARDUINO_MAXIMUM_UPLOAD_SIZE_TOKEN=%ARDUINO_MODEL%.upload.maximum_size
 
 set ARDUINO_NAME=
 rem maybe this could be relevant for Arduino Robot Control but it is not built into abuild.bat
+rem I did not build it in because I can not test it
 rem set ARDUINO_CORE_TOKEN=%ARDUINO_MODEL%.build.core
+
+pushd "%boards_txt_directory_path%"
 
 rem https://technet.microsoft.com/en-us/library/bb490909.aspx
 for /F "eol=# tokens=1,2* delims==" %%i in (boards.txt) do (
@@ -107,6 +130,8 @@ for /F "eol=# tokens=1,2* delims==" %%i in (boards.txt) do (
   )
 
 )
+
+popd
 
 if not defined ARDUINO_NAME (
   echo Did not find a model %ARDUINO_MODEL%

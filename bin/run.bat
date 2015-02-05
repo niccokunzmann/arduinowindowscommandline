@@ -4,7 +4,7 @@ rem ---------------------------------------------------------------------
 rem                     show the help
 
 if "%~1" == "" (
-  echo "test_positioning_system.bat example_file"
+  echo "run.bat example_file"
   echo.
   echo example_file
   echo     a path to an example file
@@ -18,13 +18,6 @@ rem                     remove compiled files
 IF EXIST ".\obj" (
     rmdir ".\obj" /s /q
 )
-
-rem ---------------------------------------------------------------------
-rem                     set variables
-
-call set_environment_variables.bat "C:\Program Files (x86)\Arduino" C:\Users\cheche\Documents\Arduino uno COM15
-
-
 
 if errorlevel 0 (
 
