@@ -5,11 +5,11 @@ Arduino Windows Command Line
 Try it
 ------
 
-	> set_environment_variables.bat "C:\Program Files (x86)\Arduino" "C:\Users\UserName\Documents\Arduino" uno COM15
+	set_environment_variables.bat "C:\Program Files (x86)\Arduino" "C:\Users\UserName\Documents\Arduino" uno COM15
 
 configures the compiler and uploader.
 
-	> run.bat simple_program\simple_program.ino
+	run.bat simple_program\simple_program.ino
 
 compiles, uploads and shows the output of `simple_program.ino` on the Arduino.  
 You will see
@@ -26,6 +26,8 @@ You will see
 	2
 	1
 	0
+
+Read more in the [try_it](./try_it) folder.
 
 What is in it
 -------------
