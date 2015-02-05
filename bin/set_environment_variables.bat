@@ -11,14 +11,19 @@ if "%~4" == "" (
   @echo.  
   @echo     ARDUINO_PATH 
   @echo         is the path where the Arduino software is installed.
-  if not defined ARDUINO_PATH (
-    if "%ProgramFiles(x86)%" NEQ "" (
-      @echo         Example: "%ProgramFiles(x86)%\Arduino"
-      @echo         Example: "%ProgramFiles%\Arduino"
-      set likely_arduino_path="%ProgramFiles(x86)%\Arduino"
-    ) else (
-      @echo         Example: "%ProgramFiles%\Arduino"
-      set likely_arduino_path="%ProgramFiles%\Arduino"
+  if "%ProgramFiles(x86)%" NEQ "" (
+    @echo         Example: "%ProgramFiles(x86)%\Arduino"
+    @echo         Example: "%ProgramFiles%\Arduino"
+    set likely_arduino_path="%ProgramFiles(x86)%\Arduino"
+  ) else (
+    @echo         Example: "%ProgramFiles%\Arduino"
+    set likely_arduino_path="%ProgramFiles%\Arduino"
+  )
+  if defined ARDUINO_PATH (
+    if "%ARDUINO_PATH%" NEQ "%ProgramFiles(x86)%\Arduino" (
+      if "%ARDUINO_PATH%" NEQ "%ProgramFiles%\Arduino" (
+        @echo         Example: "%ARDUINO_PATH%"
+      )
     )
   )
   @echo.
