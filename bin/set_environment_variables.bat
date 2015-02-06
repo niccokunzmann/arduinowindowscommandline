@@ -46,7 +46,7 @@ if "%~4" == "" (
   @echo         It is the port where the output of Serial.print will go to, too.
   @echo         Example: COM12
   @echo         The following COM ports were detected:
-  set spcp=hello
+  set spcp=false
   for /F "delims=" %%i in ('%~p0\EnumSer.exe') do (
     rem http://stackoverflow.com/a/8607291/1320237
     if "%%i" == "EnumPorts method reports" (
@@ -162,7 +162,7 @@ rem set ARDUINO_CORE_TOKEN=%ARDUINO_MODEL%.build.core
 
 pushd "%boards_txt_directory_path%"
 
-rem https://technet.microsoft.com/en-us/library/bb490909.aspx
+rem parse file https://technet.microsoft.com/en-us/library/bb490909.aspx
 for /F "eol=# tokens=1,2* delims==" %%i in (boards.txt) do (
 
   rem using if http://www.robvanderwoude.com/if.php
