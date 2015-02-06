@@ -21,14 +21,14 @@ set abuild_promptForUpload=true
 REM ---------------------------------------------------------------------------
 REM     Look for command line options...
 :NextOption
-if /i "%1" == "-v" (
+if /i "%~1" == "-v" (
     set abuild_report=echo.abuild.bat:
     set abuild_verbose=true
     shift
     goto NextOption
 )
 
-if /i "%1" == "-o" (
+if /i "%~1" == "-o" (
     if "%2" == "" (
         !abuild_error! expected output path after '-o'
         goto end
@@ -39,31 +39,31 @@ if /i "%1" == "-o" (
     goto NextOption
 )
 
-if /i "%1" == "-r" (
+if /i "%~1" == "-r" (
     set abuild_rebuild_runtime=true
     shift
     goto NextOption
 )
 
-if /i "%1" == "-n" (
+if /i "%~1" == "-n" (
 	set abuild_nolibs=true
 	shift
 	goto NextOption
 )
 
-if /i "%1" == "-c" (
+if /i "%~1" == "-c" (
     set abuild_upload=false
     shift
     goto NextOption
 )
 
-if /i "%1" == "-u" (
+if /i "%~1" == "-u" (
     set abuild_promptForUpload=false
     shift
     goto NextOption
 )
 
-if "%1" == "" (goto usage)
+if "%~1" == "" (goto usage)
 
 set abuild_SketchName=%~1
 if not exist !abuild_SketchName! (
@@ -103,15 +103,15 @@ if /i "!abuild_SketchName:~-4!" == ".ino" (
 )
 
 if "!preprocess_sketch!" == "true" (
-    REM     If we see .pde on the end, we will do a tiny amount of preprocessing,
+    REM     If we see .pde or .ino on the end, we will do a tiny amount of preprocessing,
     REM     but not as much as the Arduino IDE would do.
-    FOR /f %%i IN ("%abuild_SketchName%") DO (
+    FOR %%i IN ("!abuild_SketchName!") DO (
       set abuild_cppname=!abuild_output!\%%~ni.cpp
     )
     set abuild_preprocess=true
     !abuild_report! found PDE file; will do minor preprocessing ==^>  !abuild_cppname!
     > !abuild_cppname! echo.#include ^<Arduino.h^>
-    >>!abuild_cppname! type !abuild_SketchName!
+    >>!abuild_cppname! type "!abuild_SketchName!"
     if exist "!arduino_runtime!\main.cxx" (
         REM     Getting here means we are using the library optimization patch.
         >>!abuild_cppname! type "!arduino_runtime!\main.cxx"
@@ -182,7 +182,7 @@ set abuild_gcc_opts=-c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-s
 set abuild_gpp_opts=!abuild_gcc_opts! 
 set abuild_short_name=
 
-for %%f in (!abuild_cppname!) do (
+for %%f in ("!abuild_cppname!") do (
     set abuild_short_name=%%~nf
     set abuild_user_objfile=!abuild_output!\%%~nf.cpp.o
     set abuild_cmd=avr-g++ !abuild_gpp_opts! %%f -o !abuild_user_objfile!
