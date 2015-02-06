@@ -10,7 +10,7 @@ To run them you need to
 Configuration
 -------------
 
-In my case I `set_environment_variables.bat` like this:
+I set environment variables by running
 
 	set_environment_variables.bat 
 
@@ -46,7 +46,7 @@ It outputs a help which I use to build a command:
 	        The following COM ports were detected:
 	                 COM15 <Arduino Uno>
 	
-So I copy together the examples and COM port:
+So I copy together the examples and COM port and run
 
 	set_environment_variables.bat "C:\Program Files (x86)\Arduino" "C:\Users\cheche\Documents\Arduino" uno COM15
 
@@ -55,7 +55,7 @@ Now I can run the example programs.
 Simple Program
 --------------
 
-This is a simple program that communicates with the computer via the `Serial`.
+This is a [program](./simple_program/simple_program.ino) that communicates with the computer via the `Serial` port.
 
 You can run it with
 
