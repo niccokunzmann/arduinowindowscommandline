@@ -73,6 +73,7 @@ if "%~4" == "" (
   @echo.
   @echo   Download
   @echo   --------
+  @echo.
   @echo   You can download the arduino software form http://arduino.cc/en/Main/Software
   @echo.
   @echo   Variables
@@ -121,6 +122,8 @@ if "%~4" == "" (
   @echo         the maximum possible size of the binary that runs on the arduino
   @echo         This is determined using boards.txt
   @echo.
+  rem http://stackoverflow.com/questions/24021095/call-batch-file-environment-variables-discarded-in-windows-7
+  endlocal
   exit /b 1
 )
 
