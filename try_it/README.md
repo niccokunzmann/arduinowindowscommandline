@@ -4,7 +4,7 @@ Examples
 This folder contains example files.
 To run them you need to
 
-1. Configure the environment once using `set_environment_variables.bat`
+1. Configure the environment once using `aconfigure.bat`
 2. run some example files
 
 Configuration
@@ -12,13 +12,13 @@ Configuration
 
 I set environment variables by running
 
-	set_environment_variables.bat 
+	aconfigure.bat 
 
 It outputs a help which I use to build a command:
 	
 	sets the variables necessairy for abuild.bat and aupload.bat
 	
-	  set_environment_variables.bat ARDUINO_PATH ARDUINO_USER_LIBRARIES ARDUINO_MODEL ARDUINO_COMPORT
+	  aconfigure.bat ARDUINO_PATH ARDUINO_USER_LIBRARIES ARDUINO_MODEL ARDUINO_COMPORT
 	
 	    ARDUINO_PATH
 	        is the path where the Arduino software is installed.
@@ -48,7 +48,7 @@ It outputs a help which I use to build a command:
 	
 So I copy together the examples and COM port and run
 
-	set_environment_variables.bat "C:\Program Files (x86)\Arduino" "C:\Users\cheche\Documents\Arduino" uno COM15
+	aconfigure.bat "C:\Program Files (x86)\Arduino" "C:\Users\cheche\Documents\Arduino" uno COM15
 
 Now I can run the example programs.
 
@@ -83,7 +83,7 @@ Using an Imported Library
 
 Sometimes you have extra libraries installed on your computer. You can find some at [arduino.cc](http://arduino.cc/en/Reference/Libraries) and at the [playground](http://playground.arduino.cc/Main/LibraryList).
 
-In my case they can be found in `C:\Users\cheche\Documents\Arduino` - the second argument of `set_environment_variables.bat`.
+In my case they can be found in `C:\Users\cheche\Documents\Arduino` - the second argument of `aconfigure.bat`.
 
 Run 
 

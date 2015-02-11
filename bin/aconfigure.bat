@@ -7,7 +7,7 @@ rem                     print the help
 if "%~4" == "" (
   @echo sets the variables necessairy for abuild.bat and aupload.bat
   @echo.
-  @echo   set_environment_variables.bat ARDUINO_PATH ARDUINO_USER_LIBRARIES ARDUINO_MODEL ARDUINO_COMPORT
+  @echo   %~nx0 ARDUINO_PATH ARDUINO_USER_LIBRARIES ARDUINO_MODEL ARDUINO_COMPORT
   @echo.  
   @echo     ARDUINO_PATH 
   @echo         is the path where the Arduino software is installed.
@@ -63,7 +63,7 @@ if "%~4" == "" (
   @echo   Example
   @echo   -------
   @echo.
-  @echo   set_environment_variables.bat !likely_arduino_path! "%USERPROFILE%\Documents\Arduino" uno COM12
+  @echo   %~nx0 !likely_arduino_path! "%USERPROFILE%\Documents\Arduino" uno COM12
   @echo.
   @echo   This example means that 
   @echo     - the Arduino software was installed to !likely_arduino_path!

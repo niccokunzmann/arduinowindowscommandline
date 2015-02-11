@@ -3,7 +3,7 @@ rem ---------------------------------------------------------------------------
 rem                     test for environment variables
 
 if not defined ARDUINO_MCU (
-  echo Call set_environment_variables.bat first to configure the Arduino
+  echo Call aconfigure.bat first to configure the Arduino
   exit /b 1
 )
 
@@ -15,5 +15,5 @@ if not "%NEW_ARDUINO_USER_LIBRARIES%" == "%ARDUINO_USER_LIBRARIES%" (
 )
 
 echo Running unsing_a_library.pde on the arduino using 
-echo ..\bin\run.bat Documents\Arduino\libraries\my_silly_library\examples\using_a_library\using_a_library.pde
-call ..\bin\run.bat Documents\Arduino\libraries\my_silly_library\examples\using_a_library\using_a_library.pde
+echo ..\bin\arun.bat Documents\Arduino\libraries\my_silly_library\examples\using_a_library\using_a_library.pde
+call ..\bin\arun.bat Documents\Arduino\libraries\my_silly_library\examples\using_a_library\using_a_library.pde

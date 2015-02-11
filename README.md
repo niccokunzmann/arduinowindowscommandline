@@ -5,7 +5,7 @@ Arduino Windows Command Line
 Try it
 ------
 
-	set_environment_variables.bat "C:\Program Files (x86)\Arduino" "C:\Users\UserName\Documents\Arduino" uno COM15
+	aconfigure.bat "C:\Program Files (x86)\Arduino" "C:\Users\UserName\Documents\Arduino" uno COM15
 
 configures the compiler and uploader.
 
@@ -36,7 +36,7 @@ The files were copied from
 http://playground.arduino.cc/Code/WindowsCommandLine
 and a few adaptations were made.
 
- - `set_environment_variables.bat` can be used to determine most of the variables for `abuild.bat` and `aupload.bat`.
+ - `aconfigure.bat` can be used to determine most of the variables for `abuild.bat` and `aupload.bat`.
 	 - When run without arguments you get help.
  - `abuild.bat` builds the sketches (.ino, .pde, .c, .cpp).
 	 - now requires the Arduino 1.x software with `Arduino.h` 	
